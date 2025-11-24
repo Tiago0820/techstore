@@ -188,6 +188,7 @@ try {
     <link rel="stylesheet" href="css/auth.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/profile.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -202,9 +203,6 @@ try {
                 <li><a href="products.php">Produtos</a></li>
                 <li><a href="about.php">Sobre</a></li>
                 <li><a href="contact.php">Contacto</a></li>
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li><a href="backoffice/backoffice.php">Admin</a></li>
-                <?php endif; ?>
             </ul>
 
             <div class="nav-icons">
@@ -219,14 +217,19 @@ try {
                         <span class="user-name"><?php echo htmlspecialchars($user['username'] ?? $user['name']); ?></span>
                     </a>
                     <div class="dropdown-content">
-                        <a href="profile.php" class="active"><i class="fas fa-user-circle"></i> Perfil</a>
-                        <a href="orders.php"><i class="fas fa-shopping-bag"></i> Pedidos</a>
-                        <a href="my_tickets.php">
-                            <i class="fas fa-ticket-alt"></i> Meus Tickets
-                            <?php if ($unreadTickets > 0): ?>
-                                <span class="badge-notification"><?php echo $unreadTickets; ?></span>
-                            <?php endif; ?>
-                        </a>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                            <a href="backoffice/backoffice.php"><i class="fas fa-user-shield"></i> Admin</a>
+                        <?php else: ?>
+                            <a href="profile.php" class="active"><i class="fas fa-user-circle"></i> Perfil</a>
+                            <a href="orders.php"><i class="fas fa-shopping-bag"></i> Pedidos</a>
+                            <a href="wishlist.php"><i class="fas fa-heart"></i> Favoritos</a>
+                            <a href="my_tickets.php">
+                                <i class="fas fa-ticket-alt"></i> Meus Tickets
+                                <?php if ($unreadTickets > 0): ?>
+                                    <span class="badge-notification"><?php echo $unreadTickets; ?></span>
+                                <?php endif; ?>
+                            </a>
+                        <?php endif; ?>
                         <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Sair</a>
                     </div>
                 </div>
@@ -686,5 +689,6 @@ try {
             }
         });
     </script>
+    <script src="js/search.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

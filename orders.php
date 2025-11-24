@@ -48,242 +48,9 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="css/checkout.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/cart.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/orders.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .orders-page {
-            min-height: calc(100vh - 200px);
-            padding: 40px 20px;
-            background: #f5f5f5;
-        }
-
-        .orders-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .page-header h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .page-header p {
-            color: #666;
-        }
-
-        .no-orders {
-            background: white;
-            padding: 60px 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .no-orders i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        .no-orders h2 {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .no-orders p {
-            color: #999;
-            margin-bottom: 30px;
-        }
-
-        .order-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .order-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-
-        .order-header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .order-number {
-            font-size: 1.3rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .order-status {
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .order-status.pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .order-status.processing {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .order-status.completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .order-status.cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .order-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-item i {
-            color: #667eea;
-            font-size: 1.2rem;
-            width: 25px;
-        }
-
-        .info-item div strong {
-            display: block;
-            color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 3px;
-        }
-
-        .info-item div span {
-            color: #333;
-            font-weight: 600;
-        }
-
-        .order-items-section {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .order-items-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .order-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .order-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .order-item-details {
-            flex: 1;
-        }
-
-        .order-item-details h4 {
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .order-item-details p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .order-item-price {
-            text-align: right;
-            color: #667eea;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .btn-view-details {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .btn-view-details:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .items-hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .order-info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .order-item {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .order-item img {
-                width: 100%;
-                height: 150px;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- Header -->
@@ -297,9 +64,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <li><a href="products.php">Produtos</a></li>
                 <li><a href="about.php">Sobre</a></li>
                 <li><a href="#">Contacto</a></li>
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li><a href="backoffice/backoffice.php">Admin</a></li>
-                <?php endif; ?>
                 <?php if (isset($_SESSION['username'])): ?>
                     <li><a href="logout.php">Sair</a></li>
                 <?php else: ?>
@@ -316,14 +80,19 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="user-dropdown">
                         <a href="#" class="user-icon"><i class="fas fa-user"></i> <span class="user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span></a>
                         <div class="dropdown-content">
-                            <a href="profile.php"><i class="fas fa-user-circle"></i> Perfil</a>
-                            <a href="orders.php" class="active"><i class="fas fa-shopping-bag"></i> Pedidos</a>
-                            <a href="my_tickets.php">
-                                <i class="fas fa-ticket-alt"></i> Meus Tickets
-                                <?php if ($unreadTickets > 0): ?>
-                                    <span class="badge-notification"><?php echo $unreadTickets; ?></span>
-                                <?php endif; ?>
-                            </a>
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                <a href="backoffice/backoffice.php"><i class="fas fa-user-shield"></i> Admin</a>
+                            <?php else: ?>
+                                <a href="profile.php"><i class="fas fa-user-circle"></i> Perfil</a>
+                                <a href="orders.php" class="active"><i class="fas fa-shopping-bag"></i> Pedidos</a>
+                                <a href="wishlist.php"><i class="fas fa-heart"></i> Favoritos</a>
+                                <a href="my_tickets.php">
+                                    <i class="fas fa-ticket-alt"></i> Meus Tickets
+                                    <?php if ($unreadTickets > 0): ?>
+                                        <span class="badge-notification"><?php echo $unreadTickets; ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            <?php endif; ?>
                             <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Sair</a>
                         </div>
                     </div>
@@ -473,6 +242,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <script src="js/cart.js?v=<?php echo time(); ?>"></script>
     <script src="js/main.js?v=<?php echo time(); ?>"></script>
+    <script src="js/search.js?v=<?php echo time(); ?>"></script>
     <script>
         function toggleOrderItems(orderId) {
             const itemsDiv = document.getElementById('order-items-' + orderId);

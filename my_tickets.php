@@ -96,6 +96,7 @@ $unread_count = $stmt->fetch()['unread'];
     <link rel="stylesheet" href="css/contact.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/cart.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .tickets-container {
@@ -442,7 +443,6 @@ $unread_count = $stmt->fetch()['unread'];
                 <li><a href="products.php">Produtos</a></li>
                 <li><a href="about.php">Sobre</a></li>
                 <li><a href="contact.php">Contacto</a></li>
-                <li><a href="my_tickets.php" class="active">Meus Tickets</a></li>
             </ul>
             <div class="nav-icons">
                 <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
@@ -455,9 +455,20 @@ $unread_count = $stmt->fetch()['unread'];
                         <span class="user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                     </a>
                     <div class="dropdown-content">
-                        <a href="orders.php">Pedidos</a>
-                        <a href="my_tickets.php">Tickets</a>
-                        <a href="logout.php">Sair</a>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                            <a href="backoffice/backoffice.php"><i class="fas fa-user-shield"></i> Admin</a>
+                        <?php else: ?>
+                            <a href="profile.php"><i class="fas fa-user-circle"></i> Perfil</a>
+                            <a href="orders.php"><i class="fas fa-shopping-bag"></i> Pedidos</a>
+                            <a href="wishlist.php"><i class="fas fa-heart"></i> Favoritos</a>
+                            <a href="my_tickets.php" class="active">
+                                <i class="fas fa-ticket-alt"></i> Meus Tickets
+                                <?php if ($unreadTickets > 0): ?>
+                                    <span class="badge-notification"><?php echo $unreadTickets; ?></span>
+                                <?php endif; ?>
+                            </a>
+                        <?php endif; ?>
+                        <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Sair</a>
                     </div>
                 </div>
             </div>
@@ -552,6 +563,7 @@ $unread_count = $stmt->fetch()['unread'];
 
     <script src="js/cart.js?v=<?php echo time(); ?>"></script>
     <script src="js/main.js?v=<?php echo time(); ?>"></script>
+    <script src="js/search.js?v=<?php echo time(); ?>"></script>
     <script>
         function openTicket(ticketId) {
             const modal = document.getElementById('ticketModal');

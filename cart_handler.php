@@ -10,17 +10,20 @@ if (!isset($_SESSION['cart'])) {
 }
 
 // Função para adicionar item ao carrinho
-function addToCart($productId, $name, $price, $image = '') {
+function addToCart($productId, $name, $price, $image = '', $originalPrice = '', $onPromotion = 0, $discountPercentage = 0, $quantity = 1) {
     if (!isset($_SESSION['cart'][$productId])) {
         $_SESSION['cart'][$productId] = [
             'id' => $productId,
             'name' => $name,
             'price' => $price,
-            'quantity' => 1,
-            'image' => $image
+            'quantity' => $quantity,
+            'image' => $image,
+            'original_price' => $originalPrice,
+            'on_promotion' => $onPromotion,
+            'discount_percentage' => $discountPercentage
         ];
     } else {
-        $_SESSION['cart'][$productId]['quantity']++;
+        $_SESSION['cart'][$productId]['quantity'] += $quantity;
     }
     return true;
 }
@@ -53,9 +56,9 @@ function getCartTotal() {
     if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $item) {
             if (isset($item['price']) && isset($item['quantity'])) {
-                // Remover símbolo de euro e converter vírgula para ponto
-                $price = str_replace(['€', ','], ['', '.'], $item['price']);
-                $price = floatval($price);
+                // Converter o preço para float (aceita tanto com ponto quanto com vírgula)
+                $priceStr = is_numeric($item['price']) ? $item['price'] : str_replace(['€', ','], ['', '.'], $item['price']);
+                $price = floatval($priceStr);
                 $quantity = intval($item['quantity']);
                 $itemTotal = $price * $quantity;
                 $total += $itemTotal;
@@ -76,6 +79,26 @@ function getCartCount() {
     return $count;
 }
 
+// Função para calcular o custo de envio
+function getShippingCost() {
+    $subtotal = getCartTotal();
+    $shippingCost = 0.0;
+    
+    // Se o subtotal for menor que 50€, adicionar custo de envio de 5€
+    if ($subtotal < 50) {
+        $shippingCost = 5.0;
+    }
+    
+    return $shippingCost;
+}
+
+// Função para obter o total final (incluindo envio)
+function getFinalTotal() {
+    $subtotal = getCartTotal();
+    $shipping = getShippingCost();
+    return round($subtotal + $shipping, 2);
+}
+
 // Processar ações do carrinho via AJAX apenas quando este ficheiro é o alvo direto
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -88,7 +111,11 @@ if (
             case 'add':
                 if (isset($_POST['product_id'], $_POST['name'], $_POST['price'])) {
                     $image = $_POST['image'] ?? '';
-                    addToCart($_POST['product_id'], $_POST['name'], $_POST['price'], $image);
+                    $originalPrice = $_POST['original_price'] ?? '';
+                    $onPromotion = $_POST['on_promotion'] ?? 0;
+                    $discountPercentage = $_POST['discount_percentage'] ?? 0;
+                    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
+                    addToCart($_POST['product_id'], $_POST['name'], $_POST['price'], $image, $originalPrice, $onPromotion, $discountPercentage, $quantity);
                     $response['success'] = true;
                     $response['message'] = 'Produto adicionado ao carrinho!';
                     $response['cart_count'] = getCartCount();

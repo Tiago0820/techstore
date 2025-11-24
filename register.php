@@ -89,6 +89,7 @@ if (isset($_POST['register'])) {
     <link rel="stylesheet" href="css/auth.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/cart.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -108,8 +109,6 @@ if (isset($_POST['register'])) {
                 <?php endif; ?>
                 <?php if (isset($_SESSION['username'])): ?>
                     <li><a href="logout.php">Sair</a></li>
-                <?php else: ?>
-                    <li><a href="register.php" class="active">Registrar</a></li>
                 <?php endif; ?>
             </ul>
 
@@ -163,32 +162,32 @@ if (isset($_POST['register'])) {
                     <label for="name">Nome Completo</label>
                     <div class="input-with-icon">
                         <i class="fas fa-user"></i>
-                        <input type="text" id="name" name="name" required value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
+                        <input type="text" id="name" name="name" required placeholder="Digite seu nome completo" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
                     <div class="input-with-icon">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                        <input type="email" id="email" name="email" required placeholder="Digite seu email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="password">Senha</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" required placeholder="Mínimo 6 caracteres" minlength="6">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="confirm_password">Confirmar Senha</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirme sua senha">
                     </div>
                 </div>
                 <button type="submit" name="register" class="auth-button">
-                    Criar Conta
+                    <i class="fas fa-user-plus"></i> Criar Conta
                 </button>
             </form>
             <div class="auth-links">
@@ -217,5 +216,6 @@ if (isset($_POST['register'])) {
 
     <script src="js/cart.js?v=<?php echo time(); ?>"></script>
     <script src="js/main.js?v=<?php echo time(); ?>"></script>
+    <script src="js/search.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

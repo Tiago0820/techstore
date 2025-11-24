@@ -25,7 +25,41 @@ if (isset($_SESSION['user_id'])) {
     } catch (Exception $e) {
         $unreadTickets = 0;
     }
+} else {
+    require_once __DIR__ . '/config/db.php';
 }
+
+// Buscar membros da equipa do banco de dados
+$team_members = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM team_members ORDER BY display_order ASC, id ASC");
+    $team_members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Debug - remover depois de verificar
+    // error_log("Team members fetched: " . print_r($team_members, true));
+} catch (Exception $e) {
+    // Log do erro para debug
+    error_log("Erro ao buscar equipa: " . $e->getMessage());
+    
+    // Se a tabela ainda não existir ou houver erro, usar membros padrão
+    $team_members = [
+        ['name' => 'Tiago Silva', 'role' => 'Fundador & CEO', 'description' => 'Tiago lidera a visão estratégica da TechShop e coordena as operações globais.', 'avatar_initials' => 'TS'],
+        ['name' => 'Maria Costa', 'role' => 'Responsável de Produto', 'description' => 'Maria seleciona os melhores produtos e garante alta qualidade em cada lista.', 'avatar_initials' => 'MC'],
+        ['name' => 'Luis Pereira', 'role' => 'Suporte & Logística', 'description' => 'Luis gere o suporte ao cliente e a cadeia de abastecimento para entregas rápidas.', 'avatar_initials' => 'LP']
+    ];
+}
+
+// Marcas dos produtos na loja (baseado nos produtos existentes)
+$brands = [
+    ['name' => 'Apple', 'icon' => 'fab fa-apple', 'description' => 'Inovação e design premium'],
+    ['name' => 'Samsung', 'icon' => 'fab fa-samsung', 'description' => 'Tecnologia de ponta'],
+    ['name' => 'Sony', 'icon' => 'fas fa-headphones', 'description' => 'Qualidade de som superior'],
+    ['name' => 'Nintendo', 'icon' => 'fas fa-gamepad', 'description' => 'Gaming portátil'],
+    ['name' => 'PlayStation', 'icon' => 'fab fa-playstation', 'description' => 'Consolas de nova geração'],
+    ['name' => 'Logitech', 'icon' => 'fas fa-mouse', 'description' => 'Acessórios profissionais'],
+    ['name' => 'LG', 'icon' => 'fas fa-tv', 'description' => 'Monitores de alta performance'],
+    ['name' => 'Amazon', 'icon' => 'fab fa-amazon', 'description' => 'Smart home inteligente'],
+];
 ?>
 
 <!DOCTYPE html>
@@ -38,6 +72,8 @@ if (isset($_SESSION['user_id'])) {
 	<link rel="stylesheet" href="css/about.css?v=<?php echo time(); ?>">
 	<link rel="stylesheet" href="css/cart.css?v=<?php echo time(); ?>">
 	<link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+	<link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
+	<link rel="stylesheet" href="css/brands.css?v=<?php echo time(); ?>">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -47,18 +83,22 @@ if (isset($_SESSION['user_id'])) {
 			<div class="logo">
 				<h1><a href="index.php" style="text-decoration: none; color: inherit;">TechShop</a></h1>
 		</div>
-		<ul class="nav-links">
+		<!-- Hamburger Menu for Mobile -->
+		<div class="hamburger" id="hamburger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+		
+		<ul class="nav-links" id="navLinks">
 			<li><a href="index.php">Home</a></li>
 			<li><a href="products.php">Produtos</a></li>
 			<li><a href="about.php" class="active">Sobre</a></li>
 			<li><a href="contact.php">Contacto</a></li>
-			<?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-				<li><a href="backoffice/backoffice.php">Admin</a></li>
-			<?php endif; ?>
 			<?php if (isset($_SESSION['username'])): ?>
-				<li><a href="logout.php">Sair</a></li>
+				<li class="mobile-only"><a href="logout.php">Sair</a></li>
 			<?php else: ?>
-				<li><a href="login.php">Login</a></li>
+				<li class="mobile-only"><a href="login.php">Login</a></li>
 			<?php endif; ?>
 		</ul>
 
@@ -71,19 +111,24 @@ if (isset($_SESSION['user_id'])) {
 				<div class="user-dropdown">
 					<a href="#" class="user-icon"><i class="fas fa-user"></i> <span class="user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span></a>
 					<div class="dropdown-content">
-						<a href="profile.php"><i class="fas fa-user-circle"></i> Perfil</a>
-						<a href="orders.php"><i class="fas fa-shopping-bag"></i> Pedidos</a>
-						<a href="my_tickets.php">
-							<i class="fas fa-ticket-alt"></i> Meus Tickets
-							<?php if ($unreadTickets > 0): ?>
-								<span class="badge-notification"><?php echo $unreadTickets; ?></span>
-							<?php endif; ?>
-						</a>
+						<?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+							<a href="backoffice/backoffice.php"><i class="fas fa-user-shield"></i> Admin</a>
+						<?php else: ?>
+							<a href="profile.php"><i class="fas fa-user-circle"></i> Perfil</a>
+							<a href="orders.php"><i class="fas fa-shopping-bag"></i> Pedidos</a>
+							<a href="wishlist.php"><i class="fas fa-heart"></i> Favoritos</a>
+							<a href="my_tickets.php">
+								<i class="fas fa-ticket-alt"></i> Meus Tickets
+								<?php if ($unreadTickets > 0): ?>
+									<span class="badge-notification"><?php echo $unreadTickets; ?></span>
+								<?php endif; ?>
+							</a>
+						<?php endif; ?>
 						<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Sair</a>
 					</div>
 				</div>
 			<?php else: ?>
-				<a href="login.php" class="user-icon" title="Fazer Login"><i class="fas fa-user"></i></a>
+				<a href="login.php" class="user-icon"><i class="fas fa-user"></i></a>
 			<?php endif; ?>
 		</div>
 	</nav>
@@ -147,28 +192,72 @@ if (isset($_SESSION['user_id'])) {
 			</div>
 		</section>
 
+		<!-- Brands Section -->
+		<section class="brands-section">
+			<div class="brands-container">
+				<h2 class="brands-title"><i class="fas fa-star"></i> Marcas de Confiança</h2>
+				<p class="brands-subtitle">Trabalhamos apenas com as melhores marcas do mercado</p>
+				
+				<div class="brands-carousel-wrapper">
+					<button class="brand-arrow brand-arrow-left" id="brandArrowLeft" onclick="scrollBrands(-1)" style="display: none;">
+						<i class="fas fa-chevron-left"></i>
+					</button>
+					
+					<div class="brands-carousel" id="brandsCarousel">
+						<?php foreach ($brands as $brand): ?>
+							<div class="brand-card">
+								<i class="<?php echo $brand['icon']; ?>"></i>
+								<h3><?php echo htmlspecialchars($brand['name']); ?></h3>
+								<p><?php echo htmlspecialchars($brand['description']); ?></p>
+							</div>
+						<?php endforeach; ?>
+					</div>
+					
+					<button class="brand-arrow brand-arrow-right" id="brandArrowRight" onclick="scrollBrands(1)">
+						<i class="fas fa-chevron-right"></i>
+					</button>
+				</div>
+				
+				<div class="brands-benefits">
+					<div class="benefit-item">
+						<i class="fas fa-certificate"></i>
+						<span>Produtos Originais</span>
+					</div>
+					<div class="benefit-item">
+						<i class="fas fa-shield-alt"></i>
+						<span>Garantia Oficial</span>
+					</div>
+					<div class="benefit-item">
+						<i class="fas fa-trophy"></i>
+						<span>Melhor Preço</span>
+					</div>
+				</div>
+			</div>
+		</section>
+
 		<!-- Team -->
 		<section class="team-section">
 			<h2><i class="fas fa-users-cog"></i> Nossa Equipa</h2>
-			<div class="team-grid">
-				<div class="team-member">
-					<div class="team-avatar">JS</div>
-					<h3>João Silva</h3>
-					<div class="team-role">Fundador & CEO</div>
-					<p>João lidera a visão estratégica da TechShop e coordena as operações globais.</p>
+			
+			<div class="team-carousel-wrapper">
+				<button class="team-arrow team-arrow-left" id="teamArrowLeft" onclick="scrollTeam(-1)" style="display: none;">
+					<i class="fas fa-chevron-left"></i>
+				</button>
+				
+				<div class="team-carousel" id="teamCarousel">
+					<?php foreach ($team_members as $member): ?>
+						<div class="team-member">
+							<div class="team-avatar"><?php echo htmlspecialchars($member['avatar_initials']); ?></div>
+							<h3><?php echo htmlspecialchars($member['name']); ?></h3>
+							<div class="team-role"><?php echo htmlspecialchars($member['role']); ?></div>
+							<p><?php echo htmlspecialchars($member['description']); ?></p>
+						</div>
+					<?php endforeach; ?>
 				</div>
-				<div class="team-member">
-					<div class="team-avatar">MC</div>
-					<h3>Maria Costa</h3>
-					<div class="team-role">Responsável de Produto</div>
-					<p>Maria seleciona os melhores produtos e garante alta qualidade em cada lista.</p>
-				</div>
-				<div class="team-member">
-					<div class="team-avatar">LP</div>
-					<h3>Luis Pereira</h3>
-					<div class="team-role">Suporte & Logística</div>
-					<p>Luis gere o suporte ao cliente e a cadeia de abastecimento para entregas rápidas.</p>
-				</div>
+				
+				<button class="team-arrow team-arrow-right" id="teamArrowRight" onclick="scrollTeam(1)">
+					<i class="fas fa-chevron-right"></i>
+				</button>
 			</div>
 		</section>
 
@@ -179,9 +268,9 @@ if (isset($_SESSION['user_id'])) {
 			<div class="cta-buttons">
 				<a href="products.php" class="cta-btn cta-btn-primary"><i class="fas fa-shopping-bag"></i> Ver Produtos</a>
 				<a href="contact.php" class="cta-btn cta-btn-secondary"><i class="fas fa-envelope"></i> Contacte-nos</a>
-			</div>
-		</section>
-	</main>
+		</div>
+	</section>
+</main>
 
 	<!-- Footer -->
 	<footer class="footer">
@@ -217,5 +306,102 @@ if (isset($_SESSION['user_id'])) {
 
 	<script src="js/cart.js?v=<?php echo time(); ?>"></script>
 	<script src="js/main.js?v=<?php echo time(); ?>"></script>
+	<script src="js/search.js?v=<?php echo time(); ?>"></script>
+	
+	<script>
+		// Controle do carousel de marcas
+		const carousel = document.getElementById('brandsCarousel');
+		const arrowLeft = document.getElementById('brandArrowLeft');
+		const arrowRight = document.getElementById('brandArrowRight');
+		
+		// Função para rolar o carousel de marcas
+		function scrollBrands(direction) {
+			const scrollAmount = 300; // pixels para rolar
+			carousel.scrollBy({
+				left: direction * scrollAmount,
+				behavior: 'smooth'
+			});
+			
+			// Atualizar visibilidade das setas após scroll
+			setTimeout(updateArrows, 300);
+		}
+		
+		// Função para atualizar visibilidade das setas
+		function updateArrows() {
+			const scrollLeft = carousel.scrollLeft;
+			const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+			
+			// Mostrar/ocultar seta esquerda
+			if (scrollLeft > 10) {
+				arrowLeft.style.display = 'flex';
+			} else {
+				arrowLeft.style.display = 'none';
+			}
+			
+			// Mostrar/ocultar seta direita
+			if (scrollLeft < maxScroll - 10) {
+				arrowRight.style.display = 'flex';
+			} else {
+				arrowRight.style.display = 'none';
+			}
+		}
+		
+		// Atualizar setas quando o usuário rolar manualmente
+		carousel.addEventListener('scroll', updateArrows);
+		
+		// Verificar inicialmente
+		window.addEventListener('load', updateArrows);
+		window.addEventListener('resize', updateArrows);
+		
+		// Controle do carousel da equipa
+		const teamCarousel = document.getElementById('teamCarousel');
+		const teamArrowLeft = document.getElementById('teamArrowLeft');
+		const teamArrowRight = document.getElementById('teamArrowRight');
+		
+		// Função para rolar o carousel da equipa
+		function scrollTeam(direction) {
+			const scrollAmount = 350; // pixels para rolar
+			teamCarousel.scrollBy({
+				left: direction * scrollAmount,
+				behavior: 'smooth'
+			});
+			
+			// Atualizar visibilidade das setas após scroll
+			setTimeout(updateTeamArrows, 300);
+		}
+		
+		// Função para atualizar visibilidade das setas da equipa
+		function updateTeamArrows() {
+			const scrollLeft = teamCarousel.scrollLeft;
+			const maxScroll = teamCarousel.scrollWidth - teamCarousel.clientWidth;
+			
+			// Mostrar/ocultar seta esquerda
+			if (scrollLeft > 10) {
+				teamArrowLeft.style.display = 'flex';
+			} else {
+				teamArrowLeft.style.display = 'none';
+			}
+			
+			// Mostrar/ocultar seta direita
+			if (scrollLeft < maxScroll - 10) {
+				teamArrowRight.style.display = 'flex';
+			} else {
+				teamArrowRight.style.display = 'none';
+			}
+		}
+		
+		// Atualizar setas quando o usuário rolar manualmente
+		teamCarousel.addEventListener('scroll', updateTeamArrows);
+		
+		// Verificar inicialmente
+		window.addEventListener('load', function() {
+			updateArrows();
+			updateTeamArrows();
+		});
+		window.addEventListener('resize', function() {
+			updateArrows();
+			updateTeamArrows();
+		});
+	</script>
 </body>
 </html>

@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/auth.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/cart.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/dropdown.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/search.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -111,8 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
                 <?php if (isset($_SESSION['username'])): ?>
                     <li><a href="logout.php">Sair</a></li>
-                <?php else: ?>
-                    <li><a href="login.php" class="active">Login</a></li>
                 <?php endif; ?>
             </ul>
 
@@ -137,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="login.php" class="user-icon active" title="Fazer Login"><i class="fas fa-user"></i></a>
+                    <a href="login.php" class="user-icon" title="Fazer Login"><i class="fas fa-user"></i></a>
                 <?php endif; ?>
             </div>
         </nav>
@@ -146,7 +145,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Login Form -->
     <div class="auth-container">
         <div class="auth-box">
-            <h2>Login</h2>
+            <h2>Iniciar Sessão</h2>
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="success-message">
+                    <?php 
+                        echo $_SESSION['success_message']; 
+                        unset($_SESSION['success_message']);
+                    ?>
+                </div>
+            <?php endif; ?>
             <?php if (!empty($error)): ?>
                 <div class="error-message">
                     <?php echo $error; ?>
@@ -157,18 +164,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="username">Username ou Email</label>
                     <div class="input-with-icon">
                         <i class="fas fa-user"></i>
-                        <input type="text" id="username" name="username" placeholder="Digite seu username ou email" required>
+                        <input type="text" id="username" name="username" placeholder="Digite seu username ou email" required autofocus>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Senha</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
                     </div>
                 </div>
                 <button type="submit" class="auth-button">
-                    Entrar
+                    <i class="fas fa-sign-in-alt"></i> Entrar
                 </button>
             </form>
             <div class="auth-links">
@@ -198,5 +205,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="js/cart.js?v=<?php echo time(); ?>"></script>
     <script src="js/main.js?v=<?php echo time(); ?>"></script>
+    <script src="js/search.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

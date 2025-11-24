@@ -58,16 +58,18 @@ try {
     $payment_method = $_POST['payment_method'];
     $notes = isset($_POST['notes']) ? trim($_POST['notes']) : null;
     
-    // Calcular total
-    $total_amount = getCartTotal();
+    // Calcular total com envio
+    $subtotal = getCartTotal();
+    $shipping_cost = getShippingCost();
+    $total_amount = getFinalTotal();
 
     // Inserir a encomenda
     $stmt = $pdo->prepare("
         INSERT INTO orders (
             user_id, customer_name, customer_email, customer_phone,
             customer_address, customer_city, customer_postal_code,
-            payment_method, total_amount, notes, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            payment_method, total_amount, shipping_cost, notes, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     ");
     
     $stmt->execute([
@@ -80,6 +82,7 @@ try {
         $customer_postal_code,
         $payment_method,
         $total_amount,
+        $shipping_cost,
         $notes
     ]);
 
